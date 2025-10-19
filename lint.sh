@@ -39,6 +39,17 @@ else
 fi
 echo ""
 
+# Mypy type checking (only on core project files)
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔬 Running Mypy type checker..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+if mypy config.py run_pipeline.py setup.py verify.py core/ features/ --config-file=pyproject.toml; then
+    echo -e "${GREEN}✅ Mypy: Type checking passed${NC}"
+else
+    echo -e "${YELLOW}⚠️  Mypy: Type checking found issues (non-blocking)${NC}"
+fi
+echo ""
+
 # Ruff final check (no fix mode)
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "✨ Final validation..."

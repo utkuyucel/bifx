@@ -100,7 +100,7 @@ config = DataConfig(start_date='2020-01-01', end_date='2023-12-31')
 
 ## Code Quality
 
-This project uses ruff and black for linting and formatting:
+This project uses black, ruff, and mypy for code quality:
 
 ```bash
 # Run all checks and auto-fix (recommended)
@@ -115,11 +115,15 @@ ruff check .
 
 # Auto-fix linting issues
 ruff check --fix .
+
+# Type checking
+mypy config.py core/ features/
 ```
 
 Configured limits:
 - Max line length: 100 characters
 - Max function complexity: 10
+- Type checking: mypy (non-blocking warnings)
 
 ## Adding New Features
 
