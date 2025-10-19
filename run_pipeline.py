@@ -73,8 +73,12 @@ def main():
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
     output_path = output_dir / "bifx_fear_index.csv"
-    fear_index.index.name = "date"
-    fear_index.to_csv(output_path)
+
+    # Reset index to make date a regular column and rename columns
+    fear_index_df = fear_index.reset_index()
+    fear_index_df.columns = ["date", "fear_index"]
+    fear_index_df.to_csv(output_path, index=False)
+
     logger.info(f"\nFear index saved to: {output_path}")
 
 
