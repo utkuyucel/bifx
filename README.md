@@ -86,6 +86,10 @@ Edit `config.py` to customize:
 This project uses ruff and black for linting and formatting:
 
 ```bash
+# Run all checks and auto-fix (recommended)
+./lint.sh
+
+# Or run individually:
 # Format code
 black .
 

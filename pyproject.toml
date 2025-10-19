@@ -25,6 +25,19 @@ extend-exclude = '''
 line-length = 100
 target-version = "py39"
 
+# Exclude a variety of commonly ignored directories
+exclude = [
+    ".eggs",
+    ".git",
+    ".mypy_cache",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
 # Enable specific rule sets
 select = [
     "E",     # pycodestyle errors
@@ -44,25 +57,13 @@ ignore = [
     "C901",   # too complex
 ]
 
-# Exclude a variety of commonly ignored directories
-exclude = [
-    ".eggs",
-    ".git",
-    ".mypy_cache",
-    ".venv",
-    "venv",
-    "__pycache__",
-    "build",
-    "dist",
-]
-
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
 
-[tool.ruff.mccabe]
+[tool.ruff.lint.mccabe]
 max-complexity = 10
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-first-party = ["bifx", "core", "features"]
 force-single-line = false
 lines-after-imports = 2
