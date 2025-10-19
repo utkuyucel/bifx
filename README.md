@@ -81,6 +81,25 @@ Edit `config.py` to customize:
 - Index weights
 - Backtest thresholds
 
+## Code Quality
+
+This project uses ruff and black for linting and formatting:
+
+```bash
+# Format code
+black .
+
+# Lint code
+ruff check .
+
+# Auto-fix linting issues
+ruff check --fix .
+```
+
+Configured limits:
+- Max line length: 100 characters
+- Max function complexity: 10
+
 ## Adding New Features
 
 1. Create `features/my_new_feature.py`
