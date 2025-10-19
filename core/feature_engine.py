@@ -70,4 +70,34 @@ def compute_all_features(data: dict, features_dir: Path = None) -> pd.DataFrame:
     logger.info(f"Feature computation complete. Shape: {feature_df.shape}")
     logger.info(f"Features: {list(feature_df.columns)}")
 
+    # Check and log features with high null percentage
+    _check_null_percentage(feature_df, threshold=0.30)
+
     return feature_df
+
+
+def _check_null_percentage(feature_df: pd.DataFrame, threshold: float = 0.30) -> None:
+    """Log warning for features with null percentage above threshold."""
+    if feature_df.empty:
+        return
+
+    total_rows = len(feature_df)
+    high_null_features = []
+
+    for col in feature_df.columns:
+        null_count = feature_df[col].isnull().sum()
+        null_percentage = null_count / total_rows
+
+        if null_percentage > threshold:
+            high_null_features.append((col, null_percentage, null_count))
+            logger.warning(
+                f"Feature '{col}' has {null_percentage*100:.1f}% null values "
+                f"({null_count}/{total_rows} rows) - exceeds {threshold*100:.0f}% threshold"
+            )
+
+    if high_null_features:
+        logger.warning(
+            f"Total features with >{threshold*100:.0f}% nulls: {len(high_null_features)}"
+        )
+    else:
+        logger.info(f"All features have <{threshold*100:.0f}% null values")
