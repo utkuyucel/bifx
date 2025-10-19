@@ -5,8 +5,8 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class DataConfig:
-    start_date: str = (datetime.now() - timedelta(days=365*3)).strftime('%Y-%m-%d')
-    end_date: str = datetime.now().strftime('%Y-%m-%d')
+    start_date: str = (datetime.now() - timedelta(days=365 * 3)).strftime("%Y-%m-%d")
+    end_date: str = datetime.now().strftime("%Y-%m-%d")
     cache_dir: Path = Path(__file__).parent / "data" / "raw"
     use_cache: bool = True
     cache_days_valid: int = 1
@@ -27,17 +27,21 @@ class IndexConfig:
     max_value: float = 100.0
     ema_span: int = 5
     default_weights: dict = None
-    
+
     def __post_init__(self):
         if self.default_weights is None:
-            object.__setattr__(self, 'default_weights', {
-                'realized_vol': 0.25,
-                'usdtry_shock': 0.20,
-                'cds_spike': 0.20,
-                'sentiment_trends': 0.15,
-                'vix_level': 0.10,
-                'correlation_breakdown': 0.10
-            })
+            object.__setattr__(
+                self,
+                "default_weights",
+                {
+                    "realized_vol": 0.25,
+                    "usdtry_shock": 0.20,
+                    "cds_spike": 0.20,
+                    "sentiment_trends": 0.15,
+                    "vix_level": 0.10,
+                    "correlation_breakdown": 0.10,
+                },
+            )
 
 
 @dataclass(frozen=True)
@@ -59,9 +63,9 @@ class DataSources:
     gold_ticker: str = "GC=F"
     btc_ticker: str = "BTC-USD"
     google_trends_keywords: list = None
-    
+
     def __post_init__(self):
         if self.google_trends_keywords is None:
-            object.__setattr__(self, 'google_trends_keywords', [
-                'borsa istanbul', 'dolar', 'ekonomi krizi', 'faiz'
-            ])
+            object.__setattr__(
+                self, "google_trends_keywords", ["borsa istanbul", "dolar", "ekonomi krizi", "faiz"]
+            )
