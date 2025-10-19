@@ -14,4 +14,6 @@ def compute(data: dict) -> pd.Series:
     returns = df["Close"].pct_change()
     realized_vol = returns.rolling(window=config.realized_vol_window).std() * (252**0.5)
 
-    return realized_vol.rename("realized_vol")
+    # Set the series name
+    realized_vol.name = "realized_vol"
+    return realized_vol

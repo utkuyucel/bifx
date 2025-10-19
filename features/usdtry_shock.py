@@ -21,4 +21,6 @@ def compute(data: dict) -> pd.Series:
         daily_change - daily_change.rolling(config.usdtry_shock_window).mean()
     ) / rolling_std
 
-    return shock_zscore.rename("usdtry_shock")
+    # Set the series name
+    shock_zscore.name = "usdtry_shock"
+    return shock_zscore

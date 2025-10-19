@@ -9,12 +9,21 @@ logger = logging.getLogger(__name__)
 
 
 def _normalize_zscore_minmax(series: pd.Series, min_val: float, max_val: float) -> pd.Series:
-    # First convert to z-score
-    z_score = (series - series.mean()) / series.std()
+    # Drop NaN values for calculation
+    series_clean = series.dropna()
 
-    # Then normalize to 0-1 range using robust scaling
-    z_min, z_max = z_score.quantile(0.01), z_score.quantile(0.99)
-    normalized = (z_score - z_min) / (z_max - z_min)
+    if len(series_clean) < 10:
+        return pd.Series(50.0, index=series.index)
+
+    # Use robust scaling with percentiles
+    p01 = series_clean.quantile(0.01)
+    p99 = series_clean.quantile(0.99)
+
+    if p99 == p01:
+        return pd.Series(50.0, index=series.index)
+
+    # Normalize to 0-1 range
+    normalized = (series - p01) / (p99 - p01)
 
     # Scale to target range and clip
     scaled = normalized * (max_val - min_val) + min_val
@@ -41,20 +50,28 @@ def _normalize_features(feature_df: pd.DataFrame, config: IndexConfig) -> pd.Dat
 def _apply_weights(normalized_df: pd.DataFrame, weights: dict) -> pd.Series:
     logger.info("Applying feature weights")
 
+    # Initialize result series
     weighted_sum = pd.Series(0.0, index=normalized_df.index)
-    total_weight = 0.0
+    weights_used = pd.Series(0.0, index=normalized_df.index)
 
+    # Apply weights for each feature, handling NaN values per row
     for col in normalized_df.columns:
         weight = weights.get(col, 0.0)
         if weight > 0:
-            weighted_sum += normalized_df[col] * weight
-            total_weight += weight
+            # Only add where values are not NaN
+            valid_mask = normalized_df[col].notna()
+            weighted_sum[valid_mask] += normalized_df.loc[valid_mask, col] * weight
+            weights_used[valid_mask] += weight
 
-    # Normalize by total weight to ensure output stays in 0-100 range
-    if total_weight > 0:
-        weighted_sum = weighted_sum / total_weight * 100.0
+    # Normalize by total weight per row
+    # Weights are fractions that sum to 1.0, features are 0-100
+    # So weighted average of 0-100 values should also be 0-100
+    result = weighted_sum / weights_used
 
-    return weighted_sum
+    # Replace inf/NaN with NaN (happens when no features available for a row)
+    result = result.replace([float("inf"), float("-inf")], float("nan"))
+
+    return result
 
 
 def _apply_ema_smoothing(series: pd.Series, span: int) -> pd.Series:

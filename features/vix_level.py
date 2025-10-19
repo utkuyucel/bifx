@@ -11,4 +11,6 @@ def compute(data: dict) -> pd.Series:
     # Higher VIX = higher global fear
     vix_values = df["Close"]
 
-    return vix_values.rename("vix_level")
+    # Set the series name
+    vix_values.name = "vix_level"
+    return vix_values

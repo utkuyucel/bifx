@@ -22,4 +22,6 @@ def compute(data: dict) -> pd.Series:
 
     sentiment_zscore = (sentiment - rolling_mean) / rolling_std
 
-    return sentiment_zscore.rename("sentiment_trends")
+    # Set the series name
+    sentiment_zscore.name = "sentiment_trends"
+    return sentiment_zscore

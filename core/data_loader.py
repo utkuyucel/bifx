@@ -28,9 +28,15 @@ def _is_cache_valid(cache_path: Path, config: DataConfig) -> bool:
 
 def _load_from_yfinance(ticker: str, start_date: str, end_date: str) -> pd.DataFrame:
     logger.info(f"Fetching {ticker} from yfinance ({start_date} to {end_date})")
-    df = yf.download(ticker, start=start_date, end=end_date, progress=False)
+    df = yf.download(ticker, start=start_date, end=end_date, progress=False, auto_adjust=True)
     if df.empty:
         logger.warning(f"No data returned for {ticker}")
+        return df
+
+    # Flatten multi-index columns if present
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = df.columns.get_level_values(0)
+
     return df
 
 

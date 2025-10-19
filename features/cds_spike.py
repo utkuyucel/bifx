@@ -22,4 +22,6 @@ def compute(data: dict) -> pd.Series:
 
     cds_zscore = (cds_values - rolling_mean) / rolling_std
 
-    return cds_zscore.rename("cds_spike")
+    # Set the series name
+    cds_zscore.name = "cds_spike"
+    return cds_zscore
