@@ -12,14 +12,21 @@ load_dotenv()
 
 @dataclass(frozen=True)
 class APIConfig:
-    """API keys and authentication configuration."""
+    """API keys and authentication configuration (provider-agnostic)."""
 
-    alphavantage_key: str = None
+    api_keys: dict = None
 
     def __post_init__(self):
-        if self.alphavantage_key is None:
-            key = os.getenv("ALPHAVANTAGE_API_KEY")
-            object.__setattr__(self, "alphavantage_key", key if key else "")
+        if self.api_keys is None:
+            keys = {
+                "alphavantage": os.getenv("ALPHAVANTAGE_API_KEY", ""),
+                # Add more providers here as needed
+            }
+            object.__setattr__(self, "api_keys", keys)
+
+    def get_key(self, provider: str) -> str:
+        """Get API key for a specific provider."""
+        return self.api_keys.get(provider, "")
 
 
 @dataclass(frozen=True)
@@ -118,10 +125,8 @@ class DataSources:
                 # Commodities
                 DataSourceConfig("BRENT", "yfinance", "BZ=F"),
                 DataSourceConfig("GOLD", "yfinance", "GC=F"),
-                # Crypto - can use yfinance or ccxt
+                # Crypto
                 DataSourceConfig("BTC", "yfinance", "BTC-USD"),
-                # Alternative BTC from CCXT (disabled by default)
-                DataSourceConfig("BTC_CCXT", "ccxt", "BTC/USDT", enabled=False),
                 # Manual data sources
                 DataSourceConfig("CDS", "manual", "cds_manual.csv"),
             ]

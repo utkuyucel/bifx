@@ -49,9 +49,11 @@ def _load_from_yfinance(symbol: str, start_date: str, end_date: str) -> pd.DataF
 
 
 def _load_from_alphavantage(
-    symbol: str, start_date: str, end_date: str, api_key: str
+    symbol: str, start_date: str, end_date: str, api_config: APIConfig
 ) -> pd.DataFrame:
     """Load data from Alpha Vantage."""
+    api_key = api_config.get_key("alphavantage")
+
     if not api_key:
         logger.warning(
             f"Alpha Vantage API key not configured - skipping {symbol}. "
@@ -97,51 +99,6 @@ def _load_from_alphavantage(
 
     except Exception as e:
         logger.error(f"Failed to load {symbol} from Alpha Vantage: {e}")
-        return pd.DataFrame()
-
-
-def _load_from_ccxt(symbol: str, start_date: str, end_date: str) -> pd.DataFrame:
-    """Load crypto data from CCXT (multiple exchanges)."""
-    try:
-        import ccxt
-
-        logger.info(f"Fetching {symbol} from CCXT/Binance ({start_date} to {end_date})")
-
-        exchange = ccxt.binance({"enableRateLimit": True})
-
-        # Convert dates to milliseconds timestamp
-        start_ts = int(pd.Timestamp(start_date).timestamp() * 1000)
-        end_ts = int(pd.Timestamp(end_date).timestamp() * 1000)
-
-        # Fetch OHLCV data
-        ohlcv = []
-        current_ts = start_ts
-
-        while current_ts < end_ts:
-            try:
-                batch = exchange.fetch_ohlcv(symbol, "1d", since=current_ts, limit=1000)
-                if not batch:
-                    break
-                ohlcv.extend(batch)
-                current_ts = batch[-1][0] + 86400000  # Add 1 day in ms
-            except Exception as e:
-                logger.warning(f"CCXT batch fetch error: {e}")
-                break
-
-        if not ohlcv:
-            logger.warning(f"No data returned for {symbol} from CCXT")
-            return pd.DataFrame()
-
-        # Convert to DataFrame
-        df = pd.DataFrame(ohlcv, columns=["Timestamp", "Open", "High", "Low", "Close", "Volume"])
-        df["Timestamp"] = pd.to_datetime(df["Timestamp"], unit="ms")
-        df = df.set_index("Timestamp")
-        df = df.loc[start_date:end_date]
-
-        return df
-
-    except Exception as e:
-        logger.error(f"Failed to load {symbol} from CCXT: {e}")
         return pd.DataFrame()
 
 
@@ -202,10 +159,8 @@ def _load_source(
         df = _load_from_yfinance(source_config.symbol, config.start_date, config.end_date)
     elif source_config.provider == "alphavantage":
         df = _load_from_alphavantage(
-            source_config.symbol, config.start_date, config.end_date, api_config.alphavantage_key
+            source_config.symbol, config.start_date, config.end_date, api_config
         )
-    elif source_config.provider == "ccxt":
-        df = _load_from_ccxt(source_config.symbol, config.start_date, config.end_date)
     elif source_config.provider == "manual":
         df = _load_manual_csv(source_config.symbol, config)
     else:

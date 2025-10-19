@@ -177,7 +177,6 @@ BIFX now supports multiple data providers dynamically configured in `config.py`:
 
 - **yfinance** — Yahoo Finance (default for most assets)
 - **alphavantage** — Alpha Vantage (forex, stocks) — requires API key
-- **ccxt** — Cryptocurrency exchanges (Binance default)
 - **pytrends** — Google Trends
 - **manual** — Manual CSV uploads
 
@@ -193,7 +192,6 @@ class DataSources:
         DataSourceConfig(name="USDTRY", provider="yfinance", symbol="TRY=X"),
         DataSourceConfig(name="USDTRY_AV", provider="alphavantage", symbol="TRY", enabled=False),
         DataSourceConfig(name="BTC", provider="yfinance", symbol="BTC-USD"),
-        DataSourceConfig(name="BTC_CCXT", provider="ccxt", symbol="BTC/USDT", enabled=False),
         # ... more sources
     ])
 ```
@@ -213,17 +211,7 @@ To use Alpha Vantage provider:
    DataSourceConfig(name="USDTRY_AV", provider="alphavantage", symbol="TRY", enabled=True)
    ```
 
-API keys are centrally managed in `config.py` via the `APIConfig` class.
-
-### CCXT Crypto Data (Optional)
-
-CCXT provides direct crypto exchange data:
-
-```python
-# Enable CCXT for BTC instead of yfinance
-DataSourceConfig(name="BTC", provider="yfinance", symbol="BTC-USD", enabled=False),
-DataSourceConfig(name="BTC_CCXT", provider="ccxt", symbol="BTC/USDT", enabled=True),
-```
+API keys are centrally managed in `config.py` via the `APIConfig` class, which uses a generic `api_keys` dictionary for provider-agnostic configuration.
 
 ### Manual Data Upload
 
@@ -244,6 +232,5 @@ Date,Close
 
 - **yfinance** — Primary market data provider
 - **Alpha Vantage** — Alternative for forex/stocks (requires API key)
-- **CCXT** — Cryptocurrency exchange data (Binance)
 - **Google Trends** — Search sentiment (pytrends)
 - **Manual CSV** — Custom data upload
