@@ -169,8 +169,78 @@ def compute(data: dict) -> pd.Series:
 
 MIT License — see LICENSE file
 
+## Dynamic Data Sources
+
+BIFX now supports multiple data providers dynamically configured in `config.py`:
+
+### Available Providers
+
+- **yfinance** — Yahoo Finance (default for most assets)
+- **alphavantage** — Alpha Vantage (forex, stocks) — requires API key
+- **ccxt** — Cryptocurrency exchanges (Binance default)
+- **pytrends** — Google Trends
+- **manual** — Manual CSV uploads
+
+### Configuration
+
+Edit `config.py` to enable/disable sources or switch providers:
+
+```python
+@dataclass
+class DataSources:
+    sources: list[DataSourceConfig] = field(default_factory=lambda: [
+        DataSourceConfig(name="XU100", provider="yfinance", symbol="XU100.IS"),
+        DataSourceConfig(name="USDTRY", provider="yfinance", symbol="TRY=X"),
+        DataSourceConfig(name="USDTRY_AV", provider="alphavantage", symbol="TRY", enabled=False),
+        DataSourceConfig(name="BTC", provider="yfinance", symbol="BTC-USD"),
+        DataSourceConfig(name="BTC_CCXT", provider="ccxt", symbol="BTC/USDT", enabled=False),
+        # ... more sources
+    ])
+```
+
+### Alpha Vantage Setup (Optional)
+
+To use Alpha Vantage provider:
+
+1. Get free API key from https://www.alphavantage.co/support/#api-key
+2. Create `.env` file in project root:
+   ```
+   ALPHAVANTAGE_API_KEY=your_key_here
+   ```
+3. Enable Alpha Vantage sources in config.py:
+   ```python
+   DataSourceConfig(name="USDTRY_AV", provider="alphavantage", symbol="TRY", enabled=True)
+   ```
+
+### CCXT Crypto Data (Optional)
+
+CCXT provides direct crypto exchange data:
+
+```python
+# Enable CCXT for BTC instead of yfinance
+DataSourceConfig(name="BTC", provider="yfinance", symbol="BTC-USD", enabled=False),
+DataSourceConfig(name="BTC_CCXT", provider="ccxt", symbol="BTC/USDT", enabled=True),
+```
+
+### Manual Data Upload
+
+For sources not available via API (e.g., CDS):
+
+```python
+DataSourceConfig(name="CDS", provider="manual", symbol="cds_manual.csv")
+```
+
+Place CSV file in `data/raw/` with format:
+```
+Date,Close
+2024-01-01,350.5
+2024-01-02,352.3
+```
+
 ## Data Sources
 
-- yfinance (market data)
-- Google Trends (pytrends)
-- Manual CDS data (TradingEconomics fallback)
+- **yfinance** — Primary market data provider
+- **Alpha Vantage** — Alternative for forex/stocks (requires API key)
+- **CCXT** — Cryptocurrency exchange data (Binance)
+- **Google Trends** — Search sentiment (pytrends)
+- **Manual CSV** — Custom data upload
