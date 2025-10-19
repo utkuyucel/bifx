@@ -33,6 +33,9 @@ data/raw/*.parquet
 data/raw/*.csv
 !data/raw/cds_manual.csv
 
+# Output directory
+output/
+
 # Output files
 *.png
 *.jpg
@@ -50,7 +53,7 @@ data/raw/*.csv
 *.swo
 *~
 
-# Generated files
+# Legacy generated files (moved to output/)
 bifx_fear_index.csv
 bifx_backtest_results.png
 

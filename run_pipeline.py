@@ -70,7 +70,9 @@ def main():
     logger.info("=" * 80)
 
     # Save fear index to CSV
-    output_path = Path("bifx_fear_index.csv")
+    output_dir = Path("output")
+    output_dir.mkdir(exist_ok=True)
+    output_path = output_dir / "bifx_fear_index.csv"
     fear_index.to_csv(output_path)
     logger.info(f"\nFear index saved to: {output_path}")
 

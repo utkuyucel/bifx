@@ -25,6 +25,7 @@ bifx_project/
 │   ├── feature_engine.py
 │   ├── index_calculator.py
 │   └── backtest.py
+├── output/            # Generated results (CSV, plots)
 ├── run_pipeline.py    # Main entry point
 ├── config.py          # All configuration
 └── requirements.txt
@@ -43,6 +44,10 @@ pip install -r requirements.txt
 
 # Run full pipeline
 python run_pipeline.py
+
+# Output files are saved to output/ directory
+# - output/bifx_fear_index.csv
+# - output/bifx_backtest_results.png
 ```
 
 ## Feature Plugin System

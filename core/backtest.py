@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -151,8 +152,13 @@ def _plot_results(merged_df: pd.DataFrame, metrics: dict):
     ax3.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig("bifx_backtest_results.png", dpi=150)
-    logger.info("Plots saved to bifx_backtest_results.png")
+
+    # Save to output directory
+    output_dir = Path("output")
+    output_dir.mkdir(exist_ok=True)
+    output_path = output_dir / "bifx_backtest_results.png"
+    plt.savefig(output_path, dpi=150)
+    logger.info(f"Plots saved to {output_path}")
     plt.close()
 
 
