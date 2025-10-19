@@ -1,3 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
 # Virtual Environment directories
 # Most common 5 virtual environment names
 venv/
@@ -5,3 +27,30 @@ env/
 .venv/
 .env/
 virtualenv/
+
+# Data cache
+data/raw/*.parquet
+data/raw/*.csv
+!data/raw/cds_manual.csv
+
+# Output files
+*.png
+*.jpg
+*.jpeg
+*.pdf
+
+# Notebooks
+.ipynb_checkpoints
+*.ipynb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Generated files
+bifx_fear_index.csv
+bifx_backtest_results.png
+
