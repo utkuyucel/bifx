@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from config import DataConfig, DataSourceConfig, DataSources
+from config import APIConfig, DataConfig, DataSourceConfig, DataSources
 
 
 logger = logging.getLogger(__name__)
@@ -48,27 +48,22 @@ def _load_from_yfinance(symbol: str, start_date: str, end_date: str) -> pd.DataF
         return pd.DataFrame()
 
 
-def _load_from_alphavantage(symbol: str, start_date: str, end_date: str) -> pd.DataFrame:
-    """Load data from Alpha Vantage (requires API key in .env)."""
+def _load_from_alphavantage(
+    symbol: str, start_date: str, end_date: str, api_key: str
+) -> pd.DataFrame:
+    """Load data from Alpha Vantage."""
+    if not api_key:
+        logger.warning(
+            f"Alpha Vantage API key not configured - skipping {symbol}. "
+            "Add ALPHAVANTAGE_API_KEY to .env or disable this source in config.py"
+        )
+        return pd.DataFrame()
+
     try:
-        import os
-
         import requests
-        from dotenv import load_dotenv
-
-        load_dotenv()
-
-        api_key = os.getenv("ALPHAVANTAGE_API_KEY")
-        if not api_key:
-            logger.warning(
-                f"ALPHAVANTAGE_API_KEY not found in .env file - skipping {symbol}. "
-                "Add API key to .env or disable this source in config.py"
-            )
-            return pd.DataFrame()
 
         logger.info(f"Fetching {symbol} from Alpha Vantage ({start_date} to {end_date})")
 
-        # For forex (e.g., TRY), use FX_DAILY
         url = "https://www.alphavantage.co/query"
         params = {
             "function": "FX_DAILY",
@@ -189,7 +184,9 @@ def _load_manual_csv(filename: str, config: DataConfig) -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def _load_source(source_config: DataSourceConfig, config: DataConfig) -> pd.DataFrame:
+def _load_source(
+    source_config: DataSourceConfig, config: DataConfig, api_config: APIConfig
+) -> pd.DataFrame:
     """Load data for a single source using configured provider."""
     cache_path = _get_cache_path(source_config.name, config)
 
@@ -204,7 +201,9 @@ def _load_source(source_config: DataSourceConfig, config: DataConfig) -> pd.Data
     if source_config.provider == "yfinance":
         df = _load_from_yfinance(source_config.symbol, config.start_date, config.end_date)
     elif source_config.provider == "alphavantage":
-        df = _load_from_alphavantage(source_config.symbol, config.start_date, config.end_date)
+        df = _load_from_alphavantage(
+            source_config.symbol, config.start_date, config.end_date, api_config.alphavantage_key
+        )
     elif source_config.provider == "ccxt":
         df = _load_from_ccxt(source_config.symbol, config.start_date, config.end_date)
     elif source_config.provider == "manual":
@@ -221,12 +220,16 @@ def _load_source(source_config: DataSourceConfig, config: DataConfig) -> pd.Data
     return df
 
 
-def load_data(config: DataConfig = None, sources: DataSources = None) -> dict[str, pd.DataFrame]:
+def load_data(
+    config: DataConfig = None, sources: DataSources = None, api_config: APIConfig = None
+) -> dict[str, pd.DataFrame]:
     """Load all configured data sources."""
     if config is None:
         config = DataConfig()
     if sources is None:
         sources = DataSources()
+    if api_config is None:
+        api_config = APIConfig()
 
     logger.info("Starting data load process")
 
@@ -238,7 +241,7 @@ def load_data(config: DataConfig = None, sources: DataSources = None) -> dict[st
             logger.debug(f"Skipping disabled source: {source_config.name}")
             continue
 
-        df = _load_source(source_config, config)
+        df = _load_source(source_config, config, api_config)
         if not df.empty:
             data[source_config.name] = df
 

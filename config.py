@@ -1,6 +1,25 @@
+import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+
+# Load environment variables once at module level
+load_dotenv()
+
+
+@dataclass(frozen=True)
+class APIConfig:
+    """API keys and authentication configuration."""
+
+    alphavantage_key: str = None
+
+    def __post_init__(self):
+        if self.alphavantage_key is None:
+            key = os.getenv("ALPHAVANTAGE_API_KEY")
+            object.__setattr__(self, "alphavantage_key", key if key else "")
 
 
 @dataclass(frozen=True)

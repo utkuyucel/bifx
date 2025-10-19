@@ -28,6 +28,9 @@ env/
 .env/
 virtualenv/
 
+# Environment variables (API keys, secrets)
+.env
+
 # Data cache
 data/raw/*.parquet
 data/raw/*.csv

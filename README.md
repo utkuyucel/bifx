@@ -202,15 +202,18 @@ class DataSources:
 
 To use Alpha Vantage provider:
 
-1. Get free API key from https://www.alphavantage.co/support/#api-key
-2. Create `.env` file in project root:
+1. Get free API key from: https://www.alphavantage.co/support/#api-key
+2. Copy `.env.example` to `.env` and add your key:
+   ```bash
+   cp .env.example .env
+   # Edit .env and add: ALPHAVANTAGE_API_KEY=your_actual_key
    ```
-   ALPHAVANTAGE_API_KEY=your_key_here
-   ```
-3. Enable Alpha Vantage sources in config.py:
+3. Enable Alpha Vantage sources in `config.py`:
    ```python
    DataSourceConfig(name="USDTRY_AV", provider="alphavantage", symbol="TRY", enabled=True)
    ```
+
+API keys are centrally managed in `config.py` via the `APIConfig` class.
 
 ### CCXT Crypto Data (Optional)
 
