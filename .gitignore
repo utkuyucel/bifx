@@ -1,0 +1,7 @@
+# Virtual Environment directories
+# Most common 5 virtual environment names
+venv/
+env/
+.venv/
+.env/
+virtualenv/
