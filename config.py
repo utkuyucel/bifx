@@ -31,6 +31,13 @@ class APIConfig:
 
     def get_key(self, provider: str) -> str:
         """Get API key for a specific provider."""
+        print(f"Retrieving API key for provider: {provider}")
+        if provider not in self.api_keys or not self.api_keys[provider]:
+            print(f"  ⚠️  Warning: API key for {provider} is missing or not set.")
+
+        else:
+            print(f"  ✅ API key for {provider} found.")
+
         return self.api_keys.get(provider, "")
 
 
@@ -65,15 +72,15 @@ class DataSources:
                 DataSourceConfig("SP500", "yfinance", "^GSPC"),
                 DataSourceConfig("VIX", "yfinance", "^VIX"),
                 # Forex
-                DataSourceConfig("USDTRY", "yfinance", "TRY=X"),
-                DataSourceConfig("USDTRY_AV", "alphavantage", "TRY", enabled=False),
+                # DataSourceConfig("USDTRY", "yfinance", "TRY=X"),
+                DataSourceConfig("USDTRY", "alphavantage", "TRY"),
                 # Commodities
                 DataSourceConfig("BRENT", "yfinance", "BZ=F"),
                 DataSourceConfig("GOLD", "yfinance", "GC=F"),
                 # Crypto
                 DataSourceConfig("BTC", "yfinance", "BTC-USD"),
                 # Manual data
-                DataSourceConfig("CDS", "manual", "cds_manual.csv"),
+                # DataSourceConfig("CDS", "manual", "cds_manual.csv"),
             ]
             object.__setattr__(self, "sources", default_sources)
 
@@ -87,7 +94,7 @@ class DataSources:
 class DataConfig:
     """Date range and caching configuration."""
 
-    years_back: int = 1  # Number of years back from today (if start_date not provided)
+    years_back: int = 5  # Number of years back from today (if start_date not provided)
     start_date: str = None  # Manual start date in 'YYYY-MM-DD' format, or None for auto
     end_date: str = None  # Manual end date in 'YYYY-MM-DD' format, or None for today
     cache_dir: Path = Path(__file__).parent / "data" / "raw"
