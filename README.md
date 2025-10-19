@@ -76,9 +76,26 @@ The feature engine auto-discovers and executes all plugins.
 
 Edit `config.py` to customize:
 
-- Date ranges
+### Date Configuration
+```python
+from config import DataConfig
+
+# Default: 1 year back from today
+config = DataConfig()
+
+# Custom: 3 years back
+config = DataConfig(years_back=3)
+
+# Manual start date, auto end date (today)
+config = DataConfig(start_date='2020-01-01')
+
+# Both dates manual
+config = DataConfig(start_date='2020-01-01', end_date='2023-12-31')
+```
+
+### Other Settings
 - Feature parameters (windows, thresholds)
-- Index weights
+- Index weights (realized_vol: 0.25, usdtry_shock: 0.20, etc.)
 - Backtest thresholds
 
 ## Code Quality

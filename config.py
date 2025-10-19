@@ -5,11 +5,25 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class DataConfig:
-    start_date: str = (datetime.now() - timedelta(days=365 * 3)).strftime("%Y-%m-%d")
-    end_date: str = datetime.now().strftime("%Y-%m-%d")
+    years_back: int = 1  # Number of years back from today (if start_date not provided)
+    start_date: str = None  # Manual start date in 'YYYY-MM-DD' format, or None for auto
+    end_date: str = None  # Manual end date in 'YYYY-MM-DD' format, or None for today
     cache_dir: Path = Path(__file__).parent / "data" / "raw"
     use_cache: bool = True
     cache_days_valid: int = 1
+
+    def __post_init__(self):
+        # Calculate start_date if not provided
+        if self.start_date is None:
+            calculated_start = (datetime.now() - timedelta(days=365 * self.years_back)).strftime(
+                "%Y-%m-%d"
+            )
+            object.__setattr__(self, "start_date", calculated_start)
+
+        # Calculate end_date if not provided
+        if self.end_date is None:
+            calculated_end = datetime.now().strftime("%Y-%m-%d")
+            object.__setattr__(self, "end_date", calculated_end)
 
 
 @dataclass(frozen=True)
