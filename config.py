@@ -10,6 +10,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+# =============================================================================
+# AUTHENTICATION & API CONFIGURATION
+# =============================================================================
+
+
 @dataclass(frozen=True)
 class APIConfig:
     """API keys and authentication configuration (provider-agnostic)."""
@@ -29,8 +34,59 @@ class APIConfig:
         return self.api_keys.get(provider, "")
 
 
+# =============================================================================
+# DATA LOADING CONFIGURATION
+# =============================================================================
+
+
+@dataclass(frozen=True)
+class DataSourceConfig:
+    """Configuration for a single data source."""
+
+    name: str  # Display name (e.g., "XU100", "USDTRY")
+    provider: str  # Provider name: "yfinance", "alphavantage", "pytrends", "manual"
+    symbol: str  # Provider-specific symbol/ticker
+    enabled: bool = True  # Whether to load this source
+
+
+@dataclass(frozen=True)
+class DataSources:
+    """Configure all data sources with their providers."""
+
+    sources: list = None  # List of DataSourceConfig objects
+    google_trends_keywords: list = None
+
+    def __post_init__(self):
+        # Default data sources configuration
+        if self.sources is None:
+            default_sources = [
+                # Stock market indices
+                DataSourceConfig("XU100", "yfinance", "XU100.IS"),
+                DataSourceConfig("SP500", "yfinance", "^GSPC"),
+                DataSourceConfig("VIX", "yfinance", "^VIX"),
+                # Forex
+                DataSourceConfig("USDTRY", "yfinance", "TRY=X"),
+                DataSourceConfig("USDTRY_AV", "alphavantage", "TRY", enabled=False),
+                # Commodities
+                DataSourceConfig("BRENT", "yfinance", "BZ=F"),
+                DataSourceConfig("GOLD", "yfinance", "GC=F"),
+                # Crypto
+                DataSourceConfig("BTC", "yfinance", "BTC-USD"),
+                # Manual data
+                DataSourceConfig("CDS", "manual", "cds_manual.csv"),
+            ]
+            object.__setattr__(self, "sources", default_sources)
+
+        if self.google_trends_keywords is None:
+            object.__setattr__(
+                self, "google_trends_keywords", ["borsa istanbul", "dolar", "ekonomi krizi", "faiz"]
+            )
+
+
 @dataclass(frozen=True)
 class DataConfig:
+    """Date range and caching configuration."""
+
     years_back: int = 1  # Number of years back from today (if start_date not provided)
     start_date: str = None  # Manual start date in 'YYYY-MM-DD' format, or None for auto
     end_date: str = None  # Manual end date in 'YYYY-MM-DD' format, or None for today
@@ -52,16 +108,30 @@ class DataConfig:
             object.__setattr__(self, "end_date", calculated_end)
 
 
+# =============================================================================
+# FEATURE ENGINEERING CONFIGURATION
+# =============================================================================
+
+
 @dataclass(frozen=True)
 class FeatureConfig:
+    """Parameters for feature calculations."""
+
     realized_vol_window: int = 20
     usdtry_shock_window: int = 20
     cds_spike_window: int = 60
     sentiment_window: int = 30
 
 
+# =============================================================================
+# FEAR INDEX CALCULATION CONFIGURATION
+# =============================================================================
+
+
 @dataclass(frozen=True)
 class IndexConfig:
+    """Fear index normalization and weighting configuration."""
+
     normalization_method: str = "zscore_minmax"
     min_value: float = 0.0
     max_value: float = 100.0
@@ -84,55 +154,17 @@ class IndexConfig:
             )
 
 
+# =============================================================================
+# BACKTESTING CONFIGURATION
+# =============================================================================
+
+
 @dataclass(frozen=True)
 class BacktestConfig:
+    """Backtest thresholds and evaluation parameters."""
+
     crash_threshold: float = -0.02
     high_fear_threshold: float = 70.0
     low_fear_threshold: float = 30.0
     risk_free_rate: float = 0.0
     plot_results: bool = True
-
-
-@dataclass(frozen=True)
-class DataSourceConfig:
-    """Configuration for a single data source."""
-
-    name: str  # Display name (e.g., "XU100", "USDTRY")
-    provider: str  # Provider name: "yfinance", "alphavantage", "ccxt", "pytrends", "manual"
-    symbol: str  # Provider-specific symbol/ticker
-    enabled: bool = True  # Whether to load this source
-
-
-@dataclass(frozen=True)
-class DataSources:
-    """Configure all data sources with their providers."""
-
-    sources: list = None  # List of DataSourceConfig objects
-    google_trends_keywords: list = None
-
-    def __post_init__(self):
-        # Default data sources configuration
-        if self.sources is None:
-            default_sources = [
-                # Stock market indices - yfinance
-                DataSourceConfig("XU100", "yfinance", "XU100.IS"),
-                DataSourceConfig("SP500", "yfinance", "^GSPC"),
-                DataSourceConfig("VIX", "yfinance", "^VIX"),
-                # Forex - yfinance primary, alphavantage as alternative
-                DataSourceConfig("USDTRY", "yfinance", "TRY=X"),
-                # Alternative USDTRY from Alpha Vantage (disabled by default)
-                DataSourceConfig("USDTRY_AV", "alphavantage", "TRY", enabled=False),
-                # Commodities
-                DataSourceConfig("BRENT", "yfinance", "BZ=F"),
-                DataSourceConfig("GOLD", "yfinance", "GC=F"),
-                # Crypto
-                DataSourceConfig("BTC", "yfinance", "BTC-USD"),
-                # Manual data sources
-                DataSourceConfig("CDS", "manual", "cds_manual.csv"),
-            ]
-            object.__setattr__(self, "sources", default_sources)
-
-        if self.google_trends_keywords is None:
-            object.__setattr__(
-                self, "google_trends_keywords", ["borsa istanbul", "dolar", "ekonomi krizi", "faiz"]
-            )
