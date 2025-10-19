@@ -60,7 +60,10 @@ def _load_from_alphavantage(symbol: str, start_date: str, end_date: str) -> pd.D
 
         api_key = os.getenv("ALPHAVANTAGE_API_KEY")
         if not api_key:
-            logger.error("ALPHAVANTAGE_API_KEY not found in .env file")
+            logger.warning(
+                f"ALPHAVANTAGE_API_KEY not found in .env file - skipping {symbol}. "
+                "Add API key to .env or disable this source in config.py"
+            )
             return pd.DataFrame()
 
         logger.info(f"Fetching {symbol} from Alpha Vantage ({start_date} to {end_date})")
