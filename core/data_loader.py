@@ -10,6 +10,11 @@ from config import APIConfig, DataConfig, DataSourceConfig, DataSources
 logger = logging.getLogger(__name__)
 
 
+# =============================================================================
+# PROVIDER LOADER FUNCTIONS
+# =============================================================================
+
+
 def _get_cache_path(source_name: str, config: DataConfig) -> Path:
     config.cache_dir.mkdir(parents=True, exist_ok=True)
     return config.cache_dir / f"{source_name}.parquet"
@@ -25,7 +30,13 @@ def _is_cache_valid(cache_path: Path, config: DataConfig) -> bool:
     return file_age_days < config.cache_days_valid
 
 
-def _load_from_yfinance(symbol: str, start_date: str, end_date: str) -> pd.DataFrame:
+def _load_from_yfinance(
+    symbol: str,
+    start_date: str,
+    end_date: str,
+    api_config: APIConfig = None,
+    config: DataConfig = None,
+) -> pd.DataFrame:
     """Load data from Yahoo Finance."""
     try:
         import yfinance as yf
@@ -49,9 +60,17 @@ def _load_from_yfinance(symbol: str, start_date: str, end_date: str) -> pd.DataF
 
 
 def _load_from_alphavantage(
-    symbol: str, start_date: str, end_date: str, api_config: APIConfig
+    symbol: str,
+    start_date: str,
+    end_date: str,
+    api_config: APIConfig = None,
+    config: DataConfig = None,
 ) -> pd.DataFrame:
     """Load data from Alpha Vantage."""
+    if api_config is None:
+        logger.error("APIConfig required for Alpha Vantage provider")
+        return pd.DataFrame()
+
     api_key = api_config.get_key("alphavantage")
 
     if not api_key:
@@ -124,8 +143,18 @@ def _load_from_pytrends(keywords: list, start_date: str, end_date: str) -> pd.Da
         return pd.DataFrame()
 
 
-def _load_manual_csv(filename: str, config: DataConfig) -> pd.DataFrame:
+def _load_manual_csv(
+    filename: str,
+    start_date: str = None,
+    end_date: str = None,
+    api_config: APIConfig = None,
+    config: DataConfig = None,
+) -> pd.DataFrame:
     """Load manually provided CSV data."""
+    if config is None:
+        logger.error("DataConfig required for manual CSV provider")
+        return pd.DataFrame()
+
     manual_path = config.cache_dir / filename
 
     if not manual_path.exists():
@@ -141,6 +170,22 @@ def _load_manual_csv(filename: str, config: DataConfig) -> pd.DataFrame:
         return pd.DataFrame()
 
 
+# =============================================================================
+# PROVIDER REGISTRY - Maps provider names to loader functions
+# =============================================================================
+
+PROVIDER_REGISTRY = {
+    "yfinance": _load_from_yfinance,
+    "alphavantage": _load_from_alphavantage,
+    "manual": _load_manual_csv,
+}
+
+
+# =============================================================================
+# DATA LOADING FUNCTIONS
+# =============================================================================
+
+
 def _load_source(
     source_config: DataSourceConfig, config: DataConfig, api_config: APIConfig
 ) -> pd.DataFrame:
@@ -152,20 +197,22 @@ def _load_source(
         logger.info(f"Loading {source_config.name} from cache")
         return pd.read_parquet(cache_path)
 
-    # Load from provider
-    df = pd.DataFrame()
+    # Load from provider using registry
+    provider_func = PROVIDER_REGISTRY.get(source_config.provider)
 
-    if source_config.provider == "yfinance":
-        df = _load_from_yfinance(source_config.symbol, config.start_date, config.end_date)
-    elif source_config.provider == "alphavantage":
-        df = _load_from_alphavantage(
-            source_config.symbol, config.start_date, config.end_date, api_config
-        )
-    elif source_config.provider == "manual":
-        df = _load_manual_csv(source_config.symbol, config)
-    else:
+    if provider_func is None:
         logger.error(f"Unknown provider: {source_config.provider}")
+        logger.info(f"Available providers: {list(PROVIDER_REGISTRY.keys())}")
         return pd.DataFrame()
+
+    # Call provider function with all parameters
+    df = provider_func(
+        source_config.symbol,
+        config.start_date,
+        config.end_date,
+        api_config=api_config,
+        config=config,
+    )
 
     # Cache if data loaded successfully
     if not df.empty and config.use_cache:
