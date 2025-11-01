@@ -1,4 +1,4 @@
-# 🏗️ BIFX — Borsa İstanbul Fear Index
+# BIFX — Borsa İstanbul Fear Index
 
 Modular, plugin-based Fear Index system for Turkish stock market (BIST/XU100).
 
@@ -16,22 +16,24 @@ BIFX computes a normalized 0-100 fear index using multiple data sources and cust
 
 ## Architecture
 
-```
+Project structure:
+
 bifx_project/
-├── data/raw/          # Cached market data
-├── features/          # Feature plugins (drop-in .py files)
-├── core/              # Core engine modules
-│   ├── data_loader.py
-│   ├── feature_engine.py
-│   ├── index_calculator.py
-│   └── backtest.py
-├── output/            # Generated results (CSV, plots)
-├── run_pipeline.py    # Main entry point
-├── config.py          # All configuration
-└── requirements.txt
-```
+    data/raw/          # Cached market data
+    features/          # Feature plugins (drop-in .py files)
+    core/              # Core engine modules
+        data_loader.py
+        feature_engine.py
+        index_calculator.py
+        backtest.py
+    output/            # Generated results (CSV, plots)
+    run_pipeline.py    # Main entry point
+    config.py          # All configuration
+    requirements.txt
 
 ## Quick Start
+
+### Option 1: pip
 
 ```bash
 # Create virtual environment
@@ -44,11 +46,24 @@ pip install -r requirements.txt
 
 # Run full pipeline
 python run_pipeline.py
-
-# Output files are saved to output/ directory
-# - output/bifx_fear_index.csv
-# - output/bifx_backtest_results.png
 ```
+
+
+
+### Option 2: uv (recommended)
+
+uv manages its own isolated environment automatically. No need to create or activate a venv.
+If dependencies are already listed in `pyproject.toml`, simply install and run:
+
+```bash
+uv sync
+# Run full pipeline
+uv run python run_pipeline.py
+```
+
+Output files are saved to output/ directory:
+- output/bifx_fear_index.csv
+- output/bifx_backtest_results.png
 
 ## Feature Plugin System
 
@@ -82,6 +97,7 @@ The feature engine auto-discovers and executes all plugins.
 Edit `config.py` to customize:
 
 ### Date Configuration
+
 ```python
 from config import DataConfig
 
@@ -99,6 +115,7 @@ config = DataConfig(start_date='2020-01-01', end_date='2023-12-31')
 ```
 
 ### Other Settings
+
 - Feature parameters (windows, thresholds)
 - Index weights (realized_vol: 0.25, usdtry_shock: 0.20, etc.)
 - Backtest thresholds
@@ -126,6 +143,7 @@ mypy config.py core/ features/
 ```
 
 Configured limits:
+
 - Max line length: 100 characters
 - Max function complexity: 10
 - Type checking: mypy (non-blocking warnings)
@@ -167,7 +185,7 @@ def compute(data: dict) -> pd.Series:
 
 ## License
 
-MIT License — see LICENSE file
+MIT License. See LICENSE file.
 
 ## Dynamic Data Sources
 
@@ -180,7 +198,7 @@ BIFX now supports multiple data providers dynamically configured in `config.py`:
 - **pytrends** — Google Trends
 - **manual** — Manual CSV uploads
 
-### Configuration
+### Provider Configuration
 
 Edit `config.py` to enable/disable sources or switch providers:
 
@@ -200,16 +218,19 @@ class DataSources:
 
 To use Alpha Vantage provider:
 
-1. Get free API key from: https://www.alphavantage.co/support/#api-key
+1. Get free API key from: <https://www.alphavantage.co/support/#api-key>
 2. Copy `.env.example` to `.env` and add your key:
-   ```bash
+   
+    ```bash
    cp .env.example .env
    # Edit .env and add: ALPHAVANTAGE_API_KEY=your_actual_key
-   ```
+    ```
 3. Enable Alpha Vantage sources in `config.py`:
-   ```python
+   
+    ```python
    DataSourceConfig(name="USDTRY_AV", provider="alphavantage", symbol="TRY", enabled=True)
-   ```
+    ```
+
 
 API keys are centrally managed in `config.py` via the `APIConfig` class, which uses a generic `api_keys` dictionary for provider-agnostic configuration.
 
@@ -222,7 +243,8 @@ DataSourceConfig(name="CDS", provider="manual", symbol="cds_manual.csv")
 ```
 
 Place CSV file in `data/raw/` with format:
-```
+
+```csv
 Date,Close
 2024-01-01,350.5
 2024-01-02,352.3
