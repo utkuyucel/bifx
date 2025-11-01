@@ -14,26 +14,18 @@ BIFX computes a normalized 0-100 fear index using multiple data sources and cust
 - **Commodities** — Brent, Gold, BTC
 - **SP500** — Global equity correlation
 
-## Architecture
-
-Project structure:
-
-bifx_project/
-    data/raw/          # Cached market data
-    features/          # Feature plugins (drop-in .py files)
-    core/              # Core engine modules
-        data_loader.py
-        feature_engine.py
-        index_calculator.py
-        backtest.py
-    output/            # Generated results (CSV, plots)
-    run_pipeline.py    # Main entry point
-    config.py          # All configuration
-    requirements.txt
-
 ## Quick Start
 
-### Option 1: pip
+### Option 1: uv (recommended)
+
+
+```bash
+uv sync
+# Run full pipeline
+uv run python run_pipeline.py
+```
+
+### Option 2: pip
 
 ```bash
 # Create virtual environment
@@ -50,16 +42,7 @@ python run_pipeline.py
 
 
 
-### Option 2: uv (recommended)
 
-uv manages its own isolated environment automatically. No need to create or activate a venv.
-If dependencies are already listed in `pyproject.toml`, simply install and run:
-
-```bash
-uv sync
-# Run full pipeline
-uv run python run_pipeline.py
-```
 
 Output files are saved to output/ directory:
 - output/bifx_fear_index.csv
