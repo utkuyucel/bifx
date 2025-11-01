@@ -18,7 +18,6 @@ BIFX computes a normalized 0-100 fear index using multiple data sources and cust
 
 ### Option 1: uv (recommended)
 
-
 ```bash
 uv sync
 # Run full pipeline
@@ -40,11 +39,8 @@ pip install -r requirements.txt
 python run_pipeline.py
 ```
 
-
-
-
-
 Output files are saved to output/ directory:
+
 - output/bifx_fear_index.csv
 - output/bifx_backtest_results.png
 
@@ -67,7 +63,7 @@ The feature engine auto-discovers and executes all plugins.
 - `usdtry_shock.py` — USDTRY daily shock z-score
 - `cds_spike.py` — Turkey CDS spike detection
 - `sentiment_trends.py` — Google Trends sentiment
-- `example_double_price.py` — Demo plugin (XU100 * 2)
+- `example_double_price.py` — Demo plugin (XU100 \* 2)
 
 ## Backtest Metrics
 
@@ -147,10 +143,10 @@ def compute(data: dict) -> pd.Series:
     df = data.get("XU100")
     if df is None or df.empty:
         return pd.Series(dtype=float, name="my_feature")
-    
+
     # Your calculation here
     result = df["Close"].pct_change().rolling(20).std()
-    
+
     return result.rename("my_feature")
 ```
 
@@ -203,17 +199,17 @@ To use Alpha Vantage provider:
 
 1. Get free API key from: <https://www.alphavantage.co/support/#api-key>
 2. Copy `.env.example` to `.env` and add your key:
-   
-    ```bash
+
+   ```bash
    cp .env.example .env
    # Edit .env and add: ALPHAVANTAGE_API_KEY=your_actual_key
-    ```
-3. Enable Alpha Vantage sources in `config.py`:
-   
-    ```python
-   DataSourceConfig(name="USDTRY_AV", provider="alphavantage", symbol="TRY", enabled=True)
-    ```
+   ```
 
+3. Enable Alpha Vantage sources in `config.py`:
+
+   ```python
+   DataSourceConfig(name="USDTRY_AV", provider="alphavantage", symbol="TRY", enabled=True)
+   ```
 
 API keys are centrally managed in `config.py` via the `APIConfig` class, which uses a generic `api_keys` dictionary for provider-agnostic configuration.
 
